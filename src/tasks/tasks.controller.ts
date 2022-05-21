@@ -1,37 +1,26 @@
 import { UpdateTaskStatusDto } from './../dtos/update-task-status.dto';
 import { TasksService } from './tasks.service';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
-import { Task } from './tasks.model';
+
 import { CreateTaskDto } from 'src/dtos/create-tasks.dto';
 import { TaskStatus } from 'src/enums/task.enum';
 import { GetTasksFilterDto } from 'src/dtos/get-tasks-filter.dto';
+import { Task } from 'src/entities/task.entity';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private taskService: TasksService) { }
 
-  @Get()
-  getTasks(@Query() filterDto: GetTasksFilterDto): Task[] {
-    console.clear();
-    console.log(filterDto)
-
-    if (Object.keys(filterDto).length) {
-      return this.taskService.getTasks(filterDto);
-    }
-    return this.taskService
-      .getAllTasks();
-  }
-
-  @Get(":id")
-  getTasksById(@Param('id') id: string): Task {
-    return this.taskService
-      .getTaskById(id);
-  }
-
   @Post()
-  createTask(@Body() createTaskDto: CreateTaskDto): Task {
+  createTask(@Body() createTaskDto: CreateTaskDto): Promise<Task> {
     return this.taskService
       .createTask(createTaskDto);
+  }
+
+  @Get("/:id")
+  getTasksById(@Param('id') id: string): Promise<Task> {
+    return this.taskService
+      .getTaskById(id);
   }
 
   @Delete(':id')
@@ -41,11 +30,26 @@ export class TasksController {
   }
 
   @Patch(':id/status')
-  updateStatusTask(@Param('id') id: string, @Body() updateTaskStatusDto: UpdateTaskStatusDto): Task {
+  updateStatusTask(@Param('id') id: string, @Body() updateTaskStatusDto: UpdateTaskStatusDto): Promise<Task> {
     const { status } = updateTaskStatusDto;
     return this.taskService
       .updateTaskStatusById(id, status);
   }
+
+
+
+  @Get()
+  getTasks(@Query() filterDto: GetTasksFilterDto): Promise<Task[]> {
+    if (Object.keys(filterDto).length) {
+      return this.taskService.getTasks(filterDto);
+    }
+    return this.taskService.getAllTasks();
+  }
+
+
+
+
+
 
 
 
